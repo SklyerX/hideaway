@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"hideaway/utils"
 	"os"
 	"path/filepath"
+
+	"github.com/hideaway/utils"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"

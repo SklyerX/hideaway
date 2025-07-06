@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"hideaway/utils"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/hideaway/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
