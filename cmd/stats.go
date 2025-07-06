@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-	"github.com/sklyerx/hideaway//utils"
+	"github.com/sklyerx/hideaway/utils"
 	"github.com/spf13/cobra"
 )
 
