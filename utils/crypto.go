@@ -114,7 +114,7 @@ func EncryptFile(path string, outPath string, newName string, masterKey string) 
 	fileName := newName
 
 	if fileName == "" {
-		fileName = fileInfo.Name()
+		fileName = fmt.Sprintf("%s.%s", fileInfo.Name(), fileExtension) // because I don't want to force people to manually insert the file-ext
 	}
 
 	fileRecord := File{
