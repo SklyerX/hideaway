@@ -22,6 +22,7 @@ var addCmd = &cobra.Command{
 
 		path := strings.ReplaceAll(args[0], "'", "")
 		path = strings.ReplaceAll(path, "\"", "")
+		path = strings.ReplaceAll(path, "\\ ", " ")
 
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			fmt.Printf("File not found: %s", path)
