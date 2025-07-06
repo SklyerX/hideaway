@@ -3,6 +3,8 @@ package utils
 import (
 	"os"
 	"path/filepath"
+	"strings"
+	"unicode"
 )
 
 func GetAppPaths() map[string]string {
@@ -25,4 +27,16 @@ func GetAppPaths() map[string]string {
 	paths["desktop"] = desktopDir
 
 	return paths
+}
+
+func CleanPath(path string) string {
+	var result strings.Builder
+	for _, r := range path {
+		if unicode.IsSpace(r) {
+			result.WriteRune(' ')
+		} else if unicode.IsPrint(r) {
+			result.WriteRune(r)
+		}
+	}
+	return result.String()
 }

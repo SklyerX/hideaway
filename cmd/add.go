@@ -20,22 +20,52 @@ var addCmd = &cobra.Command{
 		deleteOriginal, _ := cmd.Flags().GetBool("delete")
 		newName, _ := cmd.Flags().GetString("name")
 
-		path := strings.ReplaceAll(args[0], "'", "")
-		path = strings.ReplaceAll(path, "\"", "")
-		path = strings.ReplaceAll(path, "\\ ", " ")
+		path := args[0]
 
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			fmt.Printf("File not found: %s", path)
+		if strings.HasPrefix(path, "'") && strings.HasSuffix(path, "'") {
+			path = strings.TrimPrefix(path, "'")
+			path = strings.TrimSuffix(path, "'")
+		} else if strings.HasPrefix(path, "\"") && strings.HasSuffix(path, "\"") {
+			path = strings.TrimPrefix(path, "\"")
+			path = strings.TrimSuffix(path, "\"")
+		}
+
+		path = strings.ReplaceAll(path, "\\ ", " ")
+		path = strings.ReplaceAll(path, "\\[", "[")
+		path = strings.ReplaceAll(path, "\\]", "]")
+		path = strings.ReplaceAll(path, "\\(", "(")
+		path = strings.ReplaceAll(path, "\\)", ")")
+		path = strings.ReplaceAll(path, "\\&", "&")
+
+		path = utils.CleanPath(path)
+
+		dir := filepath.Dir(path)
+		targetName := filepath.Base(path)
+
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			fmt.Printf("Error reading directory: %v", err)
 			return
-		} else if err != nil {
-			fmt.Printf("Error accessing file %s: %v", path, err)
+		}
+
+		var actualPath string
+		for _, entry := range entries {
+			cleanedEntryName := utils.CleanPath(entry.Name())
+			if cleanedEntryName == targetName {
+				actualPath = filepath.Join(dir, entry.Name())
+				break
+			}
+		}
+
+		if actualPath == "" {
+			fmt.Printf("File not found: %s", path)
 			return
 		}
 
 		filePaths := utils.GetAppPaths()
 		dumpPath := filepath.Join(filePaths["userData"], "dump")
 
-		err, data := utils.EncryptFile(path, dumpPath, newName, string(authenticatedPassword))
+		err, data := utils.EncryptFile(actualPath, dumpPath, newName, string(authenticatedPassword))
 
 		if err != nil {
 			fmt.Printf("Something went wrong while encrypting file: %v", err)
@@ -43,7 +73,7 @@ var addCmd = &cobra.Command{
 		}
 
 		if deleteOriginal {
-			os.Remove(path)
+			os.Remove(actualPath)
 			color.Red(fmt.Sprintf("[ DELETED ] file '%s' from disk (stored in vault)", data.OriginalName))
 		}
 
