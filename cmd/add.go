@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hideaway/utils"
+	utils "github.com/sklyerx/hideaway/utils"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"

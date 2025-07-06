@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hideaway/utils"
+	utils "github.com/sklyerx/hideaway/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

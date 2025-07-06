@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hideaway/utils"
+	utils "github.com/sklyerx/hideaway/utils"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/term"

@@ -19,7 +19,7 @@ Now the good stuff.
 
 Because Go is (Go)ated all you have to do is simply run:
 ```
-go install github.com/sklyerx/hideaway@latest
+go install github.com/sklyerx/hideaway/@latest
 ```
 
 and your done!
