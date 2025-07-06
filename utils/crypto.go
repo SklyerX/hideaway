@@ -46,7 +46,7 @@ func VerifyPassword(password []byte, storedHash, salt []byte) (bool, error) {
 	return subtle.ConstantTimeCompare(derivedHash, storedHash) == 1, nil
 }
 
-func EncryptFile(path string, outPath string, masterKey string) (error, File) {
+func EncryptFile(path string, outPath string, newName string, masterKey string) (error, File) {
 	config, err := ReadConfig()
 	if err != nil {
 		fmt.Printf("ERROR: Failed to grab config: %v\n", err)
@@ -107,15 +107,19 @@ func EncryptFile(path string, outPath string, masterKey string) (error, File) {
 	fileExtension := filepath.Ext(path)
 	mimeTypeByExtension := mime.TypeByExtension(fileExtension)
 
-	if mimeTypeByExtension != "" {
+	if mimeTypeByExtension == "" {
+		mimeTypeByExtension = "application/octet-stream"
+	}
 
-	} else {
+	fileName := newName
 
+	if fileName == "" {
+		fileName = fileInfo.Name()
 	}
 
 	fileRecord := File{
 		Id:           id,
-		OriginalName: fileInfo.Name(),
+		OriginalName: fileName,
 		OriginalPath: path,
 		DateAdded:    time.Now(),
 		MimeType:     mimeTypeByExtension,

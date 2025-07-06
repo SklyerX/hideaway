@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/fatih/color"
@@ -234,4 +235,77 @@ func RetrieveFile(fileId string, masterPassword []byte) error {
 	fmt.Printf("Decryption done.")
 
 	return nil
+}
+
+func DeleteFile(fileId string, masterPassword []byte) ([]File, error) {
+	paths := GetAppPaths()
+	dbPath := filepath.Join(paths["userData"], "db.enc")
+	dumpPath := filepath.Join(paths["userData"], "dump")
+
+	config, err := ReadConfig()
+	if err != nil {
+		color.Yellow("Something went wrong while reading the config file")
+		return nil, err
+	}
+
+	derivedKey := DeriveKey(masterPassword, config.Salt)
+
+	encryptedData, err := os.ReadFile(dbPath)
+	if err != nil {
+		fmt.Printf("Something went wrong while decoding db: %s", err)
+		return nil, err
+	}
+
+	decrypted, err := Decrypt(encryptedData, derivedKey)
+	if err != nil {
+		return nil, err
+	}
+
+	var jsonData Storage
+	err = json.Unmarshal(decrypted, &jsonData)
+	if err != nil {
+		fmt.Printf("Something went wrong while getting JSON data: %s", err)
+		return nil, err
+	}
+
+	var foundIndex = -1
+	for i := range jsonData.Files {
+		if jsonData.Files[i].Id == fileId {
+			foundIndex = i
+			break
+		}
+	}
+
+	if foundIndex == -1 {
+		fmt.Println("file not found")
+		return nil, fmt.Errorf("file with id %s not found", fileId)
+	}
+
+	fullFilePath := fmt.Sprintf("%s/%s.enc", dumpPath, jsonData.Files[foundIndex].Id)
+
+	jsonData.Files = slices.Delete(jsonData.Files, foundIndex, foundIndex+1)
+
+	marshaledData, err := json.MarshalIndent(jsonData, "", " ")
+	if err != nil {
+		fmt.Printf("Something went wrong while marshaling JSON data: %s", err)
+		return nil, err
+	}
+
+	encrypted, err := Encrypt(marshaledData, derivedKey)
+	if err != nil {
+		fmt.Printf("Something went wrong while re-encrypting data: %s", err)
+		return nil, err
+	}
+
+	if err := os.WriteFile(dbPath, encrypted, 0644); err != nil {
+		fmt.Printf("Something went wrong while writing db: %s", err)
+		return nil, err
+	}
+
+	if err := os.Remove(fullFilePath); err != nil {
+		fmt.Printf("Something went wrong while removing file: %s", err)
+		return nil, err
+	}
+
+	return jsonData.Files, nil
 }

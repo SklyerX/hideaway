@@ -158,13 +158,58 @@ func (m tableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			m.message = "File deleted successfully!"
-			m.isConfirmed = false
-			// Do actual deletion here
+			index := m.cursor
+			obj := m.data[index]
+			id, ok := obj["Id"]
 
-			return m, tea.Tick(3*time.Second, func(t time.Time) tea.Msg {
-				return clearMessageMsg{}
-			})
+			if ok {
+				updatedFiles, err := utils.DeleteFile(id.(string), authenticatedPassword)
+
+				if err != nil {
+					m.message = "Error deleting file"
+					m.isConfirmed = false
+					return m, tea.Tick(3*time.Second, func(t time.Time) tea.Msg {
+						return clearMessageMsg{}
+					})
+				}
+
+				files := []map[string]interface{}{}
+				for _, file := range updatedFiles {
+					fileMap := map[string]interface{}{
+						"Id":            file.Id,
+						"Original Name": file.OriginalName,
+						"Date Added":    file.DateAdded.Format("2006-01-02 15:04:05"),
+						"Mime Type":     file.MimeType,
+						"Extension":     file.Extension,
+					}
+					files = append(files, fileMap)
+				}
+
+				m.data = files
+
+				if m.cursor >= len(m.data) && len(m.data) > 0 {
+					m.cursor = len(m.data) - 1
+				}
+
+				visibleRows := m.height - 6
+				if visibleRows > 0 {
+					m.viewport.start = 0
+					m.viewport.end = min(len(m.data), visibleRows)
+				}
+
+				m.message = "File deleted successfully!"
+				m.isConfirmed = false
+
+				return m, tea.Tick(3*time.Second, func(t time.Time) tea.Msg {
+					return clearMessageMsg{}
+				})
+			} else {
+				m.message = "Invalid file ID"
+				m.isConfirmed = false
+				return m, tea.Tick(3*time.Second, func(t time.Time) tea.Msg {
+					return clearMessageMsg{}
+				})
+			}
 
 		case "n":
 			if m.isConfirmed {

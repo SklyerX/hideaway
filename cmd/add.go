@@ -18,6 +18,7 @@ var addCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		deleteOriginal, _ := cmd.Flags().GetBool("delete")
+		newName, _ := cmd.Flags().GetString("name")
 
 		path := strings.ReplaceAll(args[0], "'", "")
 		path = strings.ReplaceAll(path, "\"", "")
@@ -33,7 +34,7 @@ var addCmd = &cobra.Command{
 		filePaths := utils.GetAppPaths()
 		dumpPath := filepath.Join(filePaths["userData"], "dump")
 
-		err, data := utils.EncryptFile(path, dumpPath, string(authenticatedPassword))
+		err, data := utils.EncryptFile(path, dumpPath, newName, string(authenticatedPassword))
 
 		if err != nil {
 			fmt.Printf("Something went wrong while encrypting file: %v", err)

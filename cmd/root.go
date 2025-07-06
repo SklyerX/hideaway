@@ -179,6 +179,7 @@ func createPlaygroundCommands() *cobra.Command {
 	rootCmd.AddCommand(statsCmd)
 
 	addCmd.Flags().BoolP("delete", "d", false, "Delete the original file after storing the encrypted version")
+	addCmd.Flags().StringP("name", "n", "", "Add your own custom name (instead of the program interpreting the original file name) for better organization")
 
 	rootCmd.PersistentFlags().ParseErrorsWhitelist.UnknownFlags = true
 	addCmd.Flags().SetInterspersed(true)
