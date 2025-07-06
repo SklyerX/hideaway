@@ -75,9 +75,8 @@ func newTableModel(jsonData []map[string]interface{}) tableModel {
 		}
 	}
 
-	// Initialize viewport with default values
 	m.viewport.start = 0
-	m.viewport.end = len(jsonData) // Will be properly adjusted in first Update
+	m.viewport.end = len(jsonData)
 
 	return m
 }
@@ -91,8 +90,7 @@ func (m tableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		// Initialize viewport properly when we get size info
-		visibleRows := m.height - 6 // Account for header, borders, and help text
+		visibleRows := m.height - 6
 		if visibleRows > 0 {
 			m.viewport.end = min(len(m.data), visibleRows)
 		}
